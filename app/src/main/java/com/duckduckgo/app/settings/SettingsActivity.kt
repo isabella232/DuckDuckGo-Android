@@ -99,21 +99,27 @@ class SettingsActivity : DuckDuckGoActivity(), SettingsAutomaticallyClearWhatFra
     }
 
     private fun observeViewModel() {
-        viewModel.viewState.observe(this, Observer { viewState ->
-            viewState?.let {
-                version.setSubtitle(it.version)
-                lightThemeToggle.quietlySetIsChecked(it.lightThemeEnabled, lightThemeToggleListener)
-                autocompleteToggle.quietlySetIsChecked(it.autoCompleteSuggestionsEnabled, autocompleteToggleListener)
-                updateDefaultBrowserViewVisibility(it)
-                updateAutomaticClearDataOptions(it.automaticallyClearData)
-                setGlobalPrivacyControlSetting(it.globalPrivacyControlEnabled)
-                changeAppIcon.setImageResource(it.appIcon.icon)
+        viewModel.viewState.observe(
+            this,
+            Observer { viewState ->
+                viewState?.let {
+                    version.setSubtitle(it.version)
+                    lightThemeToggle.quietlySetIsChecked(it.lightThemeEnabled, lightThemeToggleListener)
+                    autocompleteToggle.quietlySetIsChecked(it.autoCompleteSuggestionsEnabled, autocompleteToggleListener)
+                    updateDefaultBrowserViewVisibility(it)
+                    updateAutomaticClearDataOptions(it.automaticallyClearData)
+                    setGlobalPrivacyControlSetting(it.globalPrivacyControlEnabled)
+                    changeAppIcon.setImageResource(it.appIcon.icon)
+                }
             }
-        })
+        )
 
-        viewModel.command.observe(this, Observer {
-            processCommand(it)
-        })
+        viewModel.command.observe(
+            this,
+            Observer {
+                processCommand(it)
+            }
+        )
     }
 
     private fun setGlobalPrivacyControlSetting(enabled: Boolean) {

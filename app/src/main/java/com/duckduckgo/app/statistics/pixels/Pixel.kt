@@ -273,11 +273,14 @@ class RxBasedPixel @Inject constructor(
     override fun fire(pixelName: String, parameters: Map<String, String>, encodedParameters: Map<String, String>) {
         pixelSender.sendPixel(pixelName, parameters, encodedParameters)
             .subscribeOn(Schedulers.io())
-            .subscribe({
-                Timber.v("Pixel sent: $pixelName with params: $parameters $encodedParameters")
-            }, {
-                Timber.w(it, "Pixel failed: $pixelName with params: $parameters $encodedParameters")
-            })
+            .subscribe(
+                {
+                    Timber.v("Pixel sent: $pixelName with params: $parameters $encodedParameters")
+                },
+                {
+                    Timber.w(it, "Pixel failed: $pixelName with params: $parameters $encodedParameters")
+                }
+            )
     }
 
     override fun enqueueFire(pixel: PixelName, parameters: Map<String, String>, encodedParameters: Map<String, String>) {
@@ -288,10 +291,13 @@ class RxBasedPixel @Inject constructor(
     override fun enqueueFire(pixelName: String, parameters: Map<String, String>, encodedParameters: Map<String, String>) {
         pixelSender.enqueuePixel(pixelName, parameters, encodedParameters)
             .subscribeOn(Schedulers.io())
-            .subscribe({
-                Timber.v("Pixel enqueued: $pixelName with params: $parameters $encodedParameters")
-            }, {
-                Timber.w(it, "Pixel failed: $pixelName with params: $parameters $encodedParameters")
-            })
+            .subscribe(
+                {
+                    Timber.v("Pixel enqueued: $pixelName with params: $parameters $encodedParameters")
+                },
+                {
+                    Timber.w(it, "Pixel failed: $pixelName with params: $parameters $encodedParameters")
+                }
+            )
     }
 }

@@ -112,11 +112,16 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
         tabsRecycler.layoutManager = layoutManager
         tabsRecycler.adapter = tabsAdapter
 
-        val swipeListener = ItemTouchHelper(SwipeToCloseTabListener(tabsAdapter, numberColumns, object : SwipeToCloseTabListener.OnTabSwipedListener {
-            override fun onSwiped(tab: TabEntity) {
-                onTabDeleted(tab)
-            }
-        }))
+        val swipeListener = ItemTouchHelper(
+            SwipeToCloseTabListener(
+                tabsAdapter, numberColumns,
+                object : SwipeToCloseTabListener.OnTabSwipedListener {
+                    override fun onSwiped(tab: TabEntity) {
+                        onTabDeleted(tab)
+                    }
+                }
+            )
+        )
         swipeListener.attachToRecyclerView(tabsRecycler)
 
         tabGridItemDecorator = TabGridItemDecorator(this, selectedTabId)
@@ -124,12 +129,18 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
     }
 
     private fun configureObservers() {
-        viewModel.tabs.observe(this, Observer<List<TabEntity>> {
-            render(it)
-        })
-        viewModel.command.observe(this, Observer {
-            processCommand(it)
-        })
+        viewModel.tabs.observe(
+            this,
+            Observer<List<TabEntity>> {
+                render(it)
+            }
+        )
+        viewModel.command.observe(
+            this,
+            Observer {
+                processCommand(it)
+            }
+        )
     }
 
     private fun render(tabs: List<TabEntity>) {
