@@ -41,6 +41,7 @@ import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.ui.TabSwitcherViewModel.Command
 import com.duckduckgo.app.tabs.ui.TabSwitcherViewModel.Command.Close
 import com.duckduckgo.app.tabs.ui.TabSwitcherViewModel.Command.DisplayMessage
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -48,6 +49,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.longToast
 import javax.inject.Inject
@@ -221,18 +223,18 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
             getString(R.string.closedTab, tab.title.orEmpty()),
             Snackbar.LENGTH_LONG)
             .setAction(R.string.closeTabUndo) {
-                launch {
-                    viewModel.onMarkTabAsDeletable(tab, false)
-                }
+                // noop, handled in onDismissed callback
             }
             .addCallback(object :
                 Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    // skip: snackbar is dismissed because we click on the UNDO action or dismiss() is called (this happens on device rotation)
-                    if (event != DISMISS_EVENT_ACTION && event != DISMISS_EVENT_MANUAL) {
-                        launch {
-                            viewModel.purgeDeletableTabs()
-                        }
+                    when (event) {
+                        // handle the UNDO action here as we only have one
+                        BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_ACTION -> launch { viewModel.undoDeletableTab(tab) }
+                        BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_SWIPE,
+                        BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_TIMEOUT -> launch { viewModel.purgeDeletableTabs() }
+                        BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_CONSECUTIVE,
+                        BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_MANUAL -> { /* noop */ }
                     }
                 }
             })
@@ -261,6 +263,7 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
     override fun onDestroy() {
         super.onDestroy()
         disposable.clear()
+        runBlocking { viewModel.purgeDeletableTabs() }
     }
 
     private fun clearObserversEarlyToStopViewUpdates() {
