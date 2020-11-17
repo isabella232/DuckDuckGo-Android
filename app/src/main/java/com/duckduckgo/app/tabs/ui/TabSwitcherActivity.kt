@@ -49,7 +49,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.longToast
 import javax.inject.Inject
@@ -263,7 +262,10 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
     override fun onDestroy() {
         super.onDestroy()
         disposable.clear()
-        runBlocking { viewModel.purgeDeletableTabs() }
+        // we don't want to purge during device rotation
+        if (isFinishing) {
+            launch { viewModel.purgeDeletableTabs() }
+        }
     }
 
     private fun clearObserversEarlyToStopViewUpdates() {
