@@ -103,6 +103,7 @@ class AppIconModifier @Inject constructor(
     
     
     
+    
 
     private fun setComponentState(context: Context, componentName: String, componentState: Int) {
         context.packageManager.setComponentEnabledSetting(
